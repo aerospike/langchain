@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _import_aerospike() -> Any:  # TODO: Replace this with Any
+def _import_aerospike() -> Any:
     try:
         from aerospike_vector_search import Client
     except ImportError as e:
@@ -82,8 +82,6 @@ class Aerospike(VectorStore):
             distance_strategy: Distance strategy to use for similarity search
                 This should match the distance strategy used during index creation.
         """
-
-        # TODO should we accept seeds and create the client for them?
 
         aerospike = _import_aerospike()
 
@@ -162,7 +160,7 @@ class Aerospike(VectorStore):
         ids: Optional[List[str]] = None,
         set_name: Optional[
             str
-        ] = None,  # TODO: Should we allow namespaces to be passed in? They are much less flexible than pinecones.
+        ] = None,
         embedding_chunk_size: int = 1000,
         index_name: Optional[str] = None,
         wait_for_index: bool = True,
@@ -543,21 +541,28 @@ class Aerospike(VectorStore):
     ) -> Aerospike:
         """
         This is a user friendly interface that:
-            1. Embeds documents.
-            2. Adds the documents to a provided Aerospike index
+            1. Embeds text.
+            2. Converts the texts into documents.
+            3. Adds the documents to a provided Aerospike index
 
         This is intended to be a quick way to get started.
 
         Example:
             .. code-block:: python
-
                 from langchain_community import Aerospike
                 from langchain_openai import OpenAIEmbeddings
-                from aerospike_vector_search import Client
-                from aerospike_vector_search.admin import Client as AdminClient
-                from aerospike_vector_search.types import HostPort
-
-                TODO
+                from aerospike_vector_search import Client, HostPort
+                
+                client = Client(seeds=HostPort(host="localhost", port=5000))
+                aerospike = Aerospike.from_texts(
+                    ["foo", "bar", "baz"],
+                    embedder,
+                    client,
+                    "namespace",
+                    index_name="index",
+                    vector_key="vector",
+                    distance_strategy=MODEL_DISTANCE_CALC,
+                )
         """
         aerospike = cls(
             client,
@@ -590,7 +595,30 @@ class Aerospike(VectorStore):
         client_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> Aerospike:
-        """Return VectorStore initialized from documents and embeddings."""
+        """
+        This is a user friendly interface that:
+            1. Embeds documents.
+            2. Adds the documents to a provided Aerospike index
+
+        This is intended to be a quick way to get started.
+
+        Example:
+            .. code-block:: python
+                from langchain_community import Aerospike
+                from langchain_openai import OpenAIEmbeddings
+                from aerospike_vector_search import Client, HostPort
+                
+                client = Client(seeds=HostPort(host="localhost", port=5000))
+                aerospike = Aerospike.from_texts(
+                    documents,
+                    embedder,
+                    client,
+                    "namespace",
+                    index_name="index",
+                    vector_key="vector",
+                    distance_strategy=MODEL_DISTANCE_CALC,
+                )
+        """
         texts = [d.page_content for d in documents]
         metadatas = [d.metadata for d in documents]
         return cls.from_texts(
