@@ -97,13 +97,16 @@ avs_client = Client(
 )
 
 # load documents
-from langchain_community.document_loaders import PyPDFLoader
+# from langchain_community.document_loaders import PyPDFLoader
 # For this example we use a PDF of the Aerospike DB architecture whitepaper.
-# This RAG application will better answer Aerospike related questions base on this information.
-loader = PyPDFLoader("https://pages.aerospike.com/rs/aerospike/images/AerospikeArch_WP_2014.pdf")
+# This RAG application will better answer Aerospike related questions based on this information.
+loader = PyPDFLoader(
+    "https://pages.aerospike.com/rs/aerospike/images/AerospikeArch_WP_2014.pdf"
+)
 data = loader.load()
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 documents = text_splitter.split_documents(data)
 
@@ -130,6 +133,7 @@ prompt = ChatPromptTemplate.from_template(template)
 
 # Conversational Retrieval Chain
 document_prompt = PromptTemplate.from_template(template="{page_content}")
+
 
 # Combine documents returned by the Aerospike Vector Search retriever
 # into a single string for better processing by the LLM

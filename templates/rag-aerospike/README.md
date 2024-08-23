@@ -1,10 +1,12 @@
 # rag-aerospike
 
-TODO: What does this package do
+This template performs RAG using Aerospike Vector Search, HuggingFace embeddings, and an OpenAI LLM. The data set is the [Aerospike architecture white paper](https://pages.aerospike.com/rs/aerospike/images/AerospikeArch_WP_2014.pdf) which is loaded, tokenized, then embedded using the all-MiniLM-L6-v2 sentence transformer. The context and embeddings are stored in the Aerospike Vector Search LangChain vector store.
+
+The chain exposed in this example shows basic usage of the Aerospike Vector Search LangChain vector store as a retriever for RAG applications.
 
 ## Environment Setup
 
-TODO: What environment variables need to be set (if any)
+Set the `OPENAI_API_KEY` environment variable to access the [OpenAI](https://platform.openai.com) models:
 
 ## Usage
 
