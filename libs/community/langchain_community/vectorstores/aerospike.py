@@ -225,10 +225,15 @@ class Aerospike(VectorStore):
                 )
 
         if wait_for_index:
-            self._client.wait_for_index_completion(
-                namespace=self._namespace,
-                name=index_name,
-            )
+            # wait_for_index_completion was removed in aerospike-vector-search 4.0.0
+            # here we try to use it but skip it if it is not available
+            try:
+                self._client.wait_for_index(
+                    namespace=self._namespace,
+                    name=index_name,
+                )
+            except AttributeError:
+                pass
 
         return ids
 
@@ -331,14 +336,30 @@ class Aerospike(VectorStore):
         if index_name is None:
             raise ValueError("index_name must be provided")
 
-        results: list[Neighbor] = self._client.vector_search(
-            index_name=index_name,
-            namespace=self._namespace,
-            query=embedding,
-            limit=k,
-            field_names=metadata_keys,
-            **kwargs,
-        )
+        # Maintain backwards compatibility with older aerospike_vector_search
+        # clients that use the renamed field_names parameter (3.1.0 and older).
+        #
+        # The field_names parameter was renamed to include_fields in 4.0.0.
+        try:
+            # First try the new parameter
+            results: list[Neighbor] = self._client.vector_search(
+                index_name=index_name,
+                namespace=self._namespace,
+                query=embedding,
+                limit=k,
+                include_fields=metadata_keys,  # New version
+                **kwargs,
+            )
+        except TypeError:
+            # If include_fields is not supported, try the old field_names
+            results: list[Neighbor] = self._client.vector_search(
+                index_name=index_name,
+                namespace=self._namespace,
+                query=embedding,
+                limit=k,
+                field_names=metadata_keys,  # Old version
+                **kwargs,
+            )
 
         for result in results:
             metadata = result.fields
