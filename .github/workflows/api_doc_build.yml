@@ -14,10 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: langchain
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           repository: langchain-ai/langchain-api-docs-html
           path: langchain-api-docs-html
@@ -25,7 +30,7 @@ jobs:
 
       - name: Get repos with yq
         id: get-unsorted-repos
-        uses: mikefarah/yq@master
+        uses: mikefarah/yq@588d0bb3dd6e3d2d8db66e4fc68761108d299abe # master
         with:
           cmd: yq '.packages[].repo' langchain/libs/packages.yml
 
@@ -93,7 +98,7 @@ jobs:
           rm -rf ../langchain-api-docs-html/_build/
 
       # https://github.com/marketplace/actions/add-commit
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:
           cwd: langchain-api-docs-html
           message: 'Update API docs build'

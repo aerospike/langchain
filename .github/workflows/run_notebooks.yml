@@ -23,7 +23,12 @@ jobs:
     if: github.repository == 'langchain-ai/langchain' || github.event_name != 'schedule'
     name: "Test docs"
     steps:
-      - uses: actions/checkout@v4
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Set up Python + Poetry ${{ env.POETRY_VERSION }}
         uses: "./.github/actions/poetry_setup"
@@ -35,12 +40,12 @@ jobs:
 
       - name: 'Authenticate to Google Cloud'
         id: 'auth'
-        uses: google-github-actions/auth@v2
+        uses: step-security/google-github-auth@f0e5c257a9534a30b5df12f43329c1eb7b85a5be # v3.0.0
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
